@@ -1,0 +1,10 @@
+{
+    "require": {
+        "econea/nusoap": "v0.9.5.3"
+    },
+    "autoload": {
+	    "classmap": [
+	      "vendor/econea/nusoap/src/nusoap.php"
+	    ]
+	}
+}
