@@ -21,7 +21,7 @@ class Melat {
 	public function bpPayRequest($amount,$orderId,$callBackUrl){
 		try{
 			if($this->nusoap->getError()){
-				throw new Exception("خطای اتصال به WSDL بانک ملت");
+				throw new MelatException("خطای اتصال به WSDL بانک ملت");
 			}
 			$localDate = date("Ymd");
 			$localTime = date("His");
@@ -40,9 +40,14 @@ class Melat {
 			);
 			$response = $this->nusoap->call('bpPayRequest',$parameters,$this->namespace);
 			if($this->nusoap->fault){
-				throw new Exception("خطای درخواست پرداخت از سرور");
+				throw new MelatException("خطای درخواست پرداخت از سرور");
 			}
-			list($ResCode,$RefId) = explode(",", $response);
+			$return = explode(",",$response);
+			$ResCode = $return[0];
+			$RefId = NULL;
+			if(@$return[1]){
+				$RefId = $return[1];
+			}
 			if($ResCode == 0){
 				$data['status'] = 'done';
 				$data['ResCode'] = $ResCode;
@@ -50,10 +55,10 @@ class Melat {
 				$data['RefId'] = $RefId;
 				return (object) $data;
 			}else{
-				throw new Exception($this->getResCodeMessage($ResCode));
+				throw new MelatException($this->getResCodeMessage($ResCode));
 			}
 
-		}catch(Exeption $e){
+		}catch(MelatException $e){
 			$data['status']='fail';
 			$data['message']=$e->getMessage();
 			return (object) $data;
@@ -63,7 +68,7 @@ class Melat {
 	public function bpVerifyRequest($orderId,$saleOrderId,$saleRefrenceId){
 		try{
 			if($this->nusoap->getError()){
-				throw new Exception("خطای اتصال به WSDL بانک ملت");
+				throw new MelatException("خطای اتصال به WSDL بانک ملت");
 			}
 			$parameters = array(
 				'terminalId'     => $this->terminalId,
@@ -75,18 +80,23 @@ class Melat {
 			);
 			$response = $this->nusoap->call('bpVerifyRequest',$parameters,$this->namespace);
 			if($this->nusoap->fault){
-				throw new Exception("خطای درخواست پرداخت از سرور");
+				throw new MelatException("خطای درخواست پرداخت از سرور");
 			}
-			list($ResCode,$RefId) = explode(",", $response);
+			$return = explode(",",$response);
+			$ResCode = $return[0];
+			$RefId = NULL;
+			if(@$return[1]){
+				$RefId = $return[1];
+			}
 			if($ResCode == 0){
 				$data['status'] = 'done';
 				$data['ResCode'] = $ResCode;
 				$data['message'] = $this->getResCodeMessage($ResCode);
 				return (object) $data;
 			}else{
-				throw new Exception($this->getResCodeMessage($ResCode));
+				throw new MelatException($this->getResCodeMessage($ResCode));
 			}
-		}catch(Exeption $e){
+		}catch(MelatException $e){
 			$data['status']='fail';
 			$data['message']=$e->getMessage();
 			return (object) $data;
@@ -174,3 +184,4 @@ class Melat {
 		return $messages[(int) $ResCode];
 	}
 }
+class MelatException extends Exception {}

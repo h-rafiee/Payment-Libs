@@ -34,7 +34,12 @@ class Melat {
 				'payerId'        => 0
 			);
 			$response = $soap->bpPayRequest($parameters);
-			list($ResCode,$RefId) = explode(",", $response);
+			$return = explode(",",$response->return);
+			$ResCode = $return[0];
+			$RefId = NULL;
+			if(@$return[1]){
+				$RefId = $return[1];
+			}
 			if($ResCode == 0){
 				$data['status'] = 'done';
 				$data['ResCode'] = $ResCode;
@@ -42,10 +47,10 @@ class Melat {
 				$data['RefId'] = $RefId;
 				return (object) $data;
 			}else{
-				throw new Exception($this->getResCodeMessage($ResCode));
+				throw new MelatException($this->getResCodeMessage($ResCode));
 			}
 
-		}catch(Exeption $e){
+		}catch(MelatException $e){
 			$data['status']='fail';
 			$data['message']=$e->getMessage();
 			return (object) $data;
@@ -64,16 +69,21 @@ class Melat {
 				'saleRefrenceId' => $saleRefrenceId
 			);
 			$response = $soap->bpVerifyRequest($parameters);
-			list($ResCode,$RefId) = explode(",", $response);
+			$return = explode(",",$response->return);
+			$ResCode = $return[0];
+			$RefId = NULL;
+			if(@$return[1]){
+				$RefId = $return[1];
+			}
 			if($ResCode == 0){
 				$data['status'] = 'done';
 				$data['ResCode'] = $ResCode;
 				$data['message'] = $this->getResCodeMessage($ResCode);
 				return (object) $data;
 			}else{
-				throw new Exception($this->getResCodeMessage($ResCode));
+				throw new MelatException($this->getResCodeMessage($ResCode));
 			}
-		}catch(Exeption $e){
+		}catch(MelatException $e){
 			$data['status']='fail';
 			$data['message']=$e->getMessage();
 			return (object) $data;
@@ -161,3 +171,4 @@ class Melat {
 		return $messages[(int) $ResCode];
 	}
 }
+class MelatException extends Exception {}
