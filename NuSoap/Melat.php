@@ -1,7 +1,9 @@
 <?php
 /**
-*	Melat Payment Class
-*/
+ *	Melat Payment Class
+ *	Author : Hossein Rafiee [ h.rafiee91@gmail.com ]
+ *	github : https://github.com/h-rafiee/Payment-Libs
+ */
 class Melat {
 	public $userName = "";
 	public $userPassword = "";
